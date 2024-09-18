@@ -1,0 +1,42 @@
+# Stage 1: Build the Go application
+FROM golang:1.23-alpine AS builder
+
+# Accept build-time variables
+ARG POSTGRESQL_DATABASE
+ARG RELAYER_URL
+
+# Set environment variables at runtime
+ENV POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE}
+ENV RELAYER_URL=${RELAYER_URL}
+
+# Set the current working directory inside the container
+WORKDIR /app
+
+# Copy the Go module files and download dependencies
+COPY go.mod go.sum ./
+RUN go mod download
+
+# RUN go mod download github.com/btcsuite/btcd/chaincfg/chainhash@v1.0.1
+
+# Copy the rest of the application source code
+COPY . .
+
+# Build the Go application
+RUN GOOS=linux GOARCH=amd64 go build -o myapp .
+
+RUN go mod tidy
+
+# Stage 2: Create a lightweight image to run the Go application
+FROM alpine:latest
+
+# Set the current working directory inside the container
+WORKDIR /app
+
+# Copy the binary built in the previous stage
+COPY --from=builder /app/myapp .
+
+# Expose port if necessary (e.g., if your Go app listens on a port)
+EXPOSE 8008
+
+# Set an entrypoint or command to run the Go application
+CMD ["./myapp"]
