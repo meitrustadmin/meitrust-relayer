@@ -36,7 +36,7 @@ WORKDIR /app
 COPY --from=builder /app/myapp .
 
 # Expose port if necessary (e.g., if your Go app listens on a port)
-EXPOSE 8008
+EXPOSE 80
 
 # Set an entrypoint or command to run the Go application
 CMD ["./myapp"]
