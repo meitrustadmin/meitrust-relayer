@@ -88,7 +88,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to create server: %v", err)
 	}
-	if err := server.Start("localhost", 8008); err != nil {
+	if err := server.Start(config.RELAYER_URL, 8008); err != nil {
 		log.Fatalf("server terminated: %v", err)
 	}
 
