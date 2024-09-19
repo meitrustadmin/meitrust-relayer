@@ -22,7 +22,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go application
-RUN GOOS=linux GOARCH=amd64 go build -o myapp .
+RUN go build -o main .
 
 RUN go mod tidy
 
@@ -30,13 +30,19 @@ RUN go mod tidy
 FROM alpine:latest
 
 # Set the current working directory inside the container
-WORKDIR /app
+WORKDIR /root/
 
 # Copy the binary built in the previous stage
-COPY --from=builder /app/myapp .
+# Copy the compiled binary from the builder container
+COPY --from=builder /app/main .
+
+# Copy the .env file
+COPY .env .
+
+RUN apk add --no-cache bash
 
 # Expose port if necessary (e.g., if your Go app listens on a port)
-EXPOSE 80
+EXPOSE 8008
 
 # Set an entrypoint or command to run the Go application
-CMD ["./myapp"]
+CMD ["./main"]
